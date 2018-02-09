@@ -25,31 +25,26 @@ By default if an inner transaction rolls back, the main will rollback.
 
 but if the promise of a rolled back inner transaction resolves. Only the inner transaction will rollback, not the parent transaction.
 
+Here we force the rollback by call calling rollback().
+If the transactional code throws an error, this will also trigger the rollback.
+
 
 ```javascript
 const {startTransaction} = require('abstract-transaction');
 
-const promise = startTransaction({
-        onRollback: () => { 
-            console.info('This is thend after main transaction has rolled back');
-        }
- })
-.then((transaction) => runInnerTransaction(transaction))
-.catch(() => console.info('it is rolled back'))
+const promise = startTransaction()
+    .then((transaction) => runInnerTransaction(transaction))
+    .catch(() => console.info('it is rolled back'))
 
 
 function runInnerTransaction(parentTransaction)
-    return parentTransaction.inner({
-        onRollback: () => { 
-            console.info('This also is executed after main transaction has rolled back');
-        }
-    })
-    .then((transaction) => transaction.rollback()))
-    .catch((err) => {
-        console.info('it is rolled back')
-        // the parent transaction will roll back too.
-        throw err;
-    );
+    return parentTransaction.startInner()
+        .then((transaction) => transaction.rollback()))
+        .catch((err) => {
+            console.info('it is rolled back')
+            // the parent transaction will roll back only if it is rejected or thrown.
+            throw err;
+        );
 }
 ```
 
@@ -73,7 +68,7 @@ const promise = startTransaction({
 
 
 function runInnerTransaction(parentTransaction)
-    return parentTransaction.inner({
+    return parentTransaction.startInner({
         onCommit: (result) => { 
             console.info('This message will never show, since the main transaction has rolled back');
         }
@@ -172,7 +167,7 @@ then((transaction) => ...) returns a promise and receives the transaction code t
 
 execute((transaction) => ...) returns a promise. This is the same as then function
 
-inner(options) returns an inner transaction
+startInner(options) returns an inner transaction
 
 rollback(), rollback the transaction
 

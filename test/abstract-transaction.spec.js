@@ -77,7 +77,7 @@ describe('abstract transaction', () => {
     it('should commit all transactions', (done) => {
         startTransaction()
         .execute((transaction) => {
-            return transaction.inner()
+            return transaction.startInner()
                 .execute(successfullProcess);
         })
         .then(done)
@@ -87,7 +87,7 @@ describe('abstract transaction', () => {
     it('should rollback due to inner transaction rollback', (done) => {
         startTransaction()
         .execute((transaction) => {
-            return transaction.inner()
+            return transaction.startInner()
                 .execute(failedProcess);
         })
         .then(() => done.fail('should have rolled back'))
@@ -97,7 +97,7 @@ describe('abstract transaction', () => {
     it('should rollback due to inner transaction rollback even if the inner transaction promise does not reject', (done) => {
         startTransaction()
         .execute((transaction) => {
-            return transaction.inner()
+            return transaction.startInner()
                 .execute(failedProcessWithNotifications)
                 .catch((err) => {
                     return err; // promise does not reject anymore
@@ -115,7 +115,7 @@ describe('abstract transaction', () => {
         startTransaction()
         .execute((transaction) => {
             // there is no return
-            transaction.inner()
+            transaction.startInner()
                 .execute(failedProcessWithNotifications);
         })
         .then(() => done.fail('should have rolled back'))
@@ -130,7 +130,7 @@ describe('abstract transaction', () => {
         .execute((transaction) => {
             // there is no return
             setTimeout(() =>
-            transaction.inner()
+            transaction.startInner()
                 .execute(successfullProcess),
                 1000);
             return Promise.resolve();
@@ -145,7 +145,7 @@ describe('abstract transaction', () => {
         startTransaction()
         .execute((transaction) => {
             // there is no return
-            transaction.inner()
+            transaction.startInner()
                 .execute(setTimeout(() => successfullProcess(),
                 1000));
             return Promise.resolve();
