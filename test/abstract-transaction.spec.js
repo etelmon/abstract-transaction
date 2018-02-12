@@ -6,7 +6,6 @@ const {startTransaction, setTransactionImplementationClass, getCoreTransactionCl
 let onCommitOption, onRollbackOption;
 
 describe('abstract transaction', () => {
-
     const successfullProcess = () => Promise.resolve();
     const failedProcess = () => Promise.reject('A PROCESS ERROR');
 
@@ -25,6 +24,10 @@ describe('abstract transaction', () => {
                 },
                 options);
             }
+
+            query() {
+                return Promise.resolve('test '+ this.id);
+            }
         }
 
         onCommitOption = jasmine.createSpy().and.callFake(() => true);
@@ -36,6 +39,20 @@ describe('abstract transaction', () => {
         startTransaction()
         .execute(successfullProcess)
         .then(done)
+        .catch((err) => done.fail(err));
+    });
+
+    it('should execute custom implementation method query and commit', (done) => {
+        let handler;
+        startTransaction()
+        .execute((_handler) => {
+            handler = _handler;
+            return handler.query();
+        })
+        .then((result) => {
+            expect(result).toBe('test ' + handler.id);
+            done();
+        })
         .catch((err) => done.fail(err));
     });
 

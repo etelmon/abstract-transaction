@@ -2,7 +2,7 @@
   "name": "abstract-transaction",
   "version": "0.0.1",
   "description": "Provide transaction class to build on to implement transaction",
-  "main": "lib/transaction.js",
+  "main": "lib/abstract-transaction.js",
   "keywords": [
     "transaction",
     "db",
